@@ -8,23 +8,26 @@ import Header from '@/components/Header';
 import BottomNavigation from '@/components/BottomNavigation';
 import { translateText, startListening, stopListening, speakText, detectLanguage } from '@/utils/translationService';
 import { useAppContext } from '@/contexts/AppContext';
+import { Badge } from '@/components/ui/badge-custom';
+
+type LanguageCode = 'en' | 'zh' | 'es' | 'fr' | 'ja' | 'ko' | 'ru' | 'de' | 'it' | 'auto';
 
 const languages = [
-  { code: 'en', name: '英语' },
-  { code: 'zh', name: '中文' },
-  { code: 'es', name: '西班牙语' },
-  { code: 'fr', name: '法语' },
-  { code: 'ja', name: '日语' },
-  { code: 'ko', name: '韩语' },
-  { code: 'ru', name: '俄语' },
-  { code: 'de', name: '德语' },
-  { code: 'it', name: '意大利语' }
+  { code: 'en', name: 'English' },
+  { code: 'zh', name: 'Chinese' },
+  { code: 'es', name: 'Spanish' },
+  { code: 'fr', name: 'French' },
+  { code: 'ja', name: 'Japanese' },
+  { code: 'ko', name: 'Korean' },
+  { code: 'ru', name: 'Russian' },
+  { code: 'de', name: 'German' },
+  { code: 'it', name: 'Italian' }
 ];
 
 const TranslatorPage = () => {
   const { preferredLanguage } = useAppContext();
-  const [sourceLanguage, setSourceLanguage] = useState('en');
-  const [targetLanguage, setTargetLanguage] = useState(preferredLanguage);
+  const [sourceLanguage, setSourceLanguage] = useState<LanguageCode>('auto');
+  const [targetLanguage, setTargetLanguage] = useState<LanguageCode>(preferredLanguage);
   const [inputText, setInputText] = useState('');
   const [translatedText, setTranslatedText] = useState('');
   const [isTranslating, setIsTranslating] = useState(false);
@@ -64,7 +67,7 @@ const TranslatorPage = () => {
       if (sourceLanguage === 'auto') {
         const detected = await detectLanguage(inputText);
         setDetectedLanguage(detected);
-        actualSourceLang = detected;
+        actualSourceLang = detected as LanguageCode;
       }
       
       const translated = await translateText(inputText, targetLanguage);
@@ -109,19 +112,19 @@ const TranslatorPage = () => {
   };
 
   return (
-    <div className="pb-16">
-      <Header title="翻译工具" />
+    <div className="pb-16 bg-gradient-to-br from-app-blue/5 to-app-purple/5">
+      <Header title="Translator" />
       
       <div className="mt-20 px-4">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg border border-gray-200/50 overflow-hidden">
           {/* Source language selection */}
-          <div className="flex items-center justify-between p-3 border-b border-gray-200">
-            <Select value={sourceLanguage} onValueChange={setSourceLanguage}>
-              <SelectTrigger className="w-[140px] border-0 focus:ring-0 pl-1 h-8">
-                <SelectValue placeholder="选择语言" />
+          <div className="flex items-center justify-between p-3 border-b border-gray-200/50 bg-gradient-to-r from-app-blue/10 to-app-purple/10">
+            <Select value={sourceLanguage} onValueChange={(value: LanguageCode) => setSourceLanguage(value)}>
+              <SelectTrigger className="w-[140px] border-0 focus:ring-0 pl-1 h-8 bg-white/50">
+                <SelectValue placeholder="Select language" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="auto">自动检测</SelectItem>
+                <SelectItem value="auto">Auto Detect</SelectItem>
                 {languages.map(lang => (
                   <SelectItem key={lang.code} value={lang.code}>
                     {lang.name}
@@ -130,13 +133,13 @@ const TranslatorPage = () => {
               </SelectContent>
             </Select>
             
-            <Button variant="ghost" size="icon" onClick={swapLanguages}>
-              <ArrowUpDown className="h-4 w-4" />
+            <Button variant="ghost" size="icon" onClick={swapLanguages} className="bg-white/50 hover:bg-white/80">
+              <ArrowUpDown className="h-4 w-4 text-app-purple" />
             </Button>
             
-            <Select value={targetLanguage} onValueChange={setTargetLanguage}>
-              <SelectTrigger className="w-[140px] border-0 focus:ring-0 pl-1 h-8">
-                <SelectValue placeholder="选择语言" />
+            <Select value={targetLanguage} onValueChange={(value: LanguageCode) => setTargetLanguage(value)}>
+              <SelectTrigger className="w-[140px] border-0 focus:ring-0 pl-1 h-8 bg-white/50">
+                <SelectValue placeholder="Select language" />
               </SelectTrigger>
               <SelectContent>
                 {languages.map(lang => (
@@ -152,16 +155,16 @@ const TranslatorPage = () => {
           <div className="p-4 relative">
             <Textarea
               ref={inputRef}
-              placeholder="输入要翻译的文本..."
+              placeholder="Enter text to translate..."
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              className="min-h-[120px] resize-none border-0 focus-visible:ring-0 p-0 text-lg"
+              className="min-h-[120px] resize-none border-0 focus-visible:ring-0 p-0 text-lg bg-transparent"
             />
             
             {detectedLanguage && sourceLanguage === 'auto' && (
               <div className="absolute top-2 right-2">
                 <Badge className="text-xs bg-gray-100 text-gray-600 hover:bg-gray-200">
-                  检测到: {languages.find(l => l.code === detectedLanguage)?.name || detectedLanguage}
+                  Detected: {languages.find(l => l.code === detectedLanguage)?.name || detectedLanguage}
                 </Badge>
               </div>
             )}
@@ -171,10 +174,11 @@ const TranslatorPage = () => {
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  onClick={() => speak(inputText, sourceLanguage)}
+                  onClick={() => speak(inputText, sourceLanguage === 'auto' ? 'en' : sourceLanguage)}
                   disabled={!inputText}
+                  className="hover:bg-app-blue/10"
                 >
-                  <Volume2 className="h-5 w-5" />
+                  <Volume2 className="h-5 w-5 text-app-blue" />
                 </Button>
                 
                 <Button 
@@ -182,35 +186,36 @@ const TranslatorPage = () => {
                   size="icon" 
                   onClick={() => copyToClipboard(inputText)}
                   disabled={!inputText}
+                  className="hover:bg-app-blue/10"
                 >
-                  <Copy className="h-5 w-5" />
+                  <Copy className="h-5 w-5 text-app-blue" />
                 </Button>
               </div>
               
               <Button 
-                variant={isListening ? "destructive" : "ghost"} 
+                variant={isListening ? "destructive" : "secondary"} 
                 size="sm" 
-                className="gap-2"
+                className={`gap-2 ${isListening ? '' : 'bg-app-purple hover:bg-app-purple/90'}`}
                 onClick={isListening ? () => stopListening() : startSpeechInput}
               >
                 <Mic className="h-4 w-4" />
-                {isListening ? '停止录音' : '语音输入'}
+                {isListening ? 'Stop Recording' : 'Voice Input'}
               </Button>
             </div>
           </div>
           
           {/* Output area */}
-          <div className="border-t border-gray-200">
+          <div className="border-t border-gray-200/50 bg-app-blue/5">
             <div className="p-4 relative">
               <div className="min-h-[120px] text-lg">
                 {isTranslating ? (
                   <div className="flex items-center justify-center h-full py-8">
-                    <div className="loader">翻译中...</div>
+                    <div className="loader">Translating...</div>
                   </div>
                 ) : translatedText ? (
                   translatedText
                 ) : (
-                  <span className="text-gray-400">翻译结果将显示在这里</span>
+                  <span className="text-gray-400">Translation will appear here</span>
                 )}
               </div>
               
@@ -221,8 +226,9 @@ const TranslatorPage = () => {
                     size="icon" 
                     onClick={() => speak(translatedText, targetLanguage)}
                     disabled={!translatedText}
+                    className="hover:bg-app-purple/10"
                   >
-                    <Volume2 className="h-5 w-5" />
+                    <Volume2 className="h-5 w-5 text-app-purple" />
                   </Button>
                   
                   <Button 
@@ -230,8 +236,9 @@ const TranslatorPage = () => {
                     size="icon" 
                     onClick={() => copyToClipboard(translatedText)}
                     disabled={!translatedText}
+                    className="hover:bg-app-purple/10"
                   >
-                    <Copy className="h-5 w-5" />
+                    <Copy className="h-5 w-5 text-app-purple" />
                   </Button>
                 </div>
               </div>

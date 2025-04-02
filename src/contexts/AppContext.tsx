@@ -15,11 +15,11 @@ interface AppContextType {
 }
 
 const defaultContext: AppContextType = {
-  preferredLanguage: 'zh',
+  preferredLanguage: 'en',
   setPreferredLanguage: () => {},
   isListening: false,
   setIsListening: () => {},
-  userName: '您',
+  userName: 'You',
   setUserName: () => {},
   userAvatar: '',
   setUserAvatar: () => {}
@@ -30,9 +30,9 @@ const AppContext = createContext<AppContextType>(defaultContext);
 export const useAppContext = () => useContext(AppContext);
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [preferredLanguage, setPreferredLanguage] = useState<LanguageCode>('zh');
+  const [preferredLanguage, setPreferredLanguage] = useState<LanguageCode>('en');
   const [isListening, setIsListening] = useState(false);
-  const [userName, setUserName] = useState('您');
+  const [userName, setUserName] = useState('You');
   const [userAvatar, setUserAvatar] = useState('');
 
   return (

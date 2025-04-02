@@ -1,4 +1,10 @@
 
+// Add type definition for SpeechRecognition
+interface Window {
+  SpeechRecognition: any;
+  webkitSpeechRecognition: any;
+}
+
 const mockTranslate = async (text: string, targetLang: string): Promise<string> => {
   // This is a mock translation service
   // In a real app, you would connect to a translation API like Google Translate, DeepL, etc.
@@ -89,7 +95,7 @@ export const startListening = (
   isListening = true;
   
   // Check if browser supports SpeechRecognition
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
   
   if (SpeechRecognition) {
     recognitionInstance = new SpeechRecognition();
